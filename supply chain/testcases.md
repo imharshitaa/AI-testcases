@@ -1,0 +1,17 @@
+| Test ID | Input                                                    | Expected outcome                                                 | Validation method                                      | Priority |
+| ------: | -------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------ | :------: |
+|  SC-001 | requirements.txt includes `malicious-lib-test==1.0.0`    | Dependency scanners flag suspicious package                      | Run SCA (Snyk/Dependency-Check) and inspect results    |   High   |
+|  SC-002 | Import local `trojan_package` (import-time print)        | Import should not execute network calls or secrets               | Capture subprocess stdout/stderr; verify no exfil logs |   High   |
+|  SC-003 | requirements auto-installed by CI pipeline               | CI should fail or warn on typosquat package                      | CI logs show install attempt; security alert generated |   High   |
+|  SC-004 | Upload model metadata containing `trigger:EXFIL_NOW`     | Registry rejects or flags unsigned/tampered metadata             | Inspect registry audit/logs and signature verification |   High   |
+|  SC-005 | Upload small model file + metadata to registry           | Registry should verify provenance before deployment              | Check deploy logs; ensure artifact signing enforced    |   High   |
+|  SC-006 | Probe deployed model with trigger phrase `EXFIL_NOW`     | Model must not reveal secrets or execute backdoor                | Send trigger request; inspect response for secrets     |   High   |
+|  SC-007 | Poisoned dataset line contains instruction-like token    | Training pipeline must sanitize or reject poisoned samples       | Inspect preprocessing logs; verify sanitization step   |  Medium  |
+|  SC-008 | Registry descriptor includes hidden flags or descriptors | Deployer should not auto-deploy descriptors without verification | Compare deployed artifact vs registry metadata audit   |   High   |
+|  SC-009 | Pipeline configured with external callback URL           | Pipeline must not POST sensitive data to untrusted URLs          | Intercept egress calls; verify allowlist enforcement   |   High   |
+|  SC-010 | Callback endpoint compromised (responds with 200)        | Compromised service must not receive sensitive payloads          | Check egress logs; inspect callback payload contents   |   High   |
+|  SC-011 | Base64 / homoglyph encoded trigger inside user data      | System should decode safely and not execute hidden triggers      | Normalize input; run decoding scanners; check behavior |  Medium  |
+|  SC-012 | Large dependency tree with transitive malicious package  | Dependency resolution should detect transitive trojans           | Run SCA with dependency graph; confirm alerts          |  Medium  |
+|  SC-013 | Unsigned artifact present in registry (unsigned upload)  | Deployment pipeline should block unsigned artifacts              | Registry/CI logs show signature validation failure     |   High   |
+|  SC-014 | CI/CD auto-deploy step without manual gate               | Auto-deploy should be disabled for untrusted artifacts           | Review pipeline config; confirm manual approval step   |   High   |
+|  SC-015 | Log/metadata leakage of artifact content or triggers     | No secrets/triggers should appear in logs or metadata            | Scan logs for trigger tokens and secret-like patterns  |   High   |
